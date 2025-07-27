@@ -1,0 +1,102 @@
+import pyautogui
+import webbrowser
+import os
+import screen_brightness_control as sbc
+
+#--- Volume contorl (pycaw) ----
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+from comtypes import CLSCTX_ALL
+
+
+#---- system task functions ----
+
+#1. Google search
+def googleSearch (query: str): #used string for user input
+    """Searches Google for the given query."""
+    try:
+        if not query.strip():
+            return "No Search Term Provide."
+        webbrowser.open(f'https://www.google.search?q={query}') # opening google search with the query
+        return(f'Searching Google for: {query}')
+    except Exception as e:
+        return f'Error in Google Search: {str(e)}'
+    
+#2. Youtube search
+def yotubeSearch (query: str): #used string for user input
+    """Searches YouTube for the given query."""
+    try:
+        if not query.strip():
+            return "No Search Term Provide."
+        webbrowser.open(f'https://www.youtube.com/result?search_query={query}') # opening youtube search with the query
+        return(f'Searching Youtube for: {query}')
+    except Exception as e:
+        return f'Error Preforming Youtube Search: {str(e)}'
+    
+#3. Screenshot
+def TakeScreenshot ():
+    try:
+        filename = 'screenshot.png'
+        pyautogui.screenshot(filename)
+        screenshot_path = os.path.join(os.getcwd(), 'screenshot.png')
+        screenshot.save(screenshot_path) # Save the screenshot to the current working directory
+        return f'Screenshot taken and saved at {screenshot_path}'   # returning the path of the screenshot
+    except Exception as e:
+        return f'Error taking screenshot: {str(e)} '
+
+#4. start Microsoft word project
+def startWordProject():
+    try: 
+        # adjust the path to your Microsoft Word executable
+        word_path = r'C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE'
+        if os.path.exists(word_path):
+            os.startfile(word_path) # starting Microsoft Word
+            return 'Microsoft Word has been started successfully.'
+        else:
+            return 'Microsoft Word executable not found. Please check the path.'
+    except Exception as e:
+        return f'Error starting Microsoft Word: {str(e)}'
+
+#5. Brightness control
+def lowerbrightness():
+    try:
+        current_brightness = sbc.get_brightness()
+        if current_brightness > 0: # Check if brightness is above 0
+            sbc.set_brightness(current_brightness - 10)
+            return f'Brightness decreased to {current_brightness - 10 , 0 }%' # Decrease brightness by 10%
+        else:
+            return 'Brightness is already at the minimum level.'
+    except Exception as e:
+        return f'Error adjusting brightness: {str(e)}'  
+    
+def higherbrightness():
+    try:
+        current_brightness =sbc.get_brightness( display = 0 ) [0] # Get current brightness
+        sbc.set_brightness (min(current_brightness + 10 ,100))
+        return f'Brightness increased to {current_brightness + 10 ,100 }%' # Increase brightness by 10%
+    except Exception as e:
+        return f'Error adjusting brightness: {str(e)}'
+
+#6. Volume control using pycaw
+def set_volume(level:float):
+    try:
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(ISimpleAudioVolume.iid , CLSCTX_ALL, None )
+        volume =interface.QueryInterface(ISimpleAudioVolume)
+        volume.SetMasterVolume(level,None)
+        return f'Volumeset to {int(level * 100)} %'
+    except Exception as e:
+        return f'The Volume could not be set: {str(e)}'
+    
+def setlowerVolume():
+        return set_volume(0.2)
+
+def sethigherVolume():
+    return set_volume(0.9)
+
+#7.Alternative Volume control using nircmd 
+def set_volume__nircmd(level,int):
+    try:
+        os.system(f'nircmd.exe setsysvolume {int(level * 65535)}')
+        return f'Volume set to {int(level * 100)}%'
+    except Exception as e:
+        return f'Error setting volume: {str(e)}'
